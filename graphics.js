@@ -1,68 +1,44 @@
-let camera, scene, renderer, cube;
+// create scene
+const scene = new THREE.Scene();
+// create perspective camera, with 75 vertical fov, aspect ratio equal to window size, near plane .1, far plane 100
+const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
-function init() {
-	// Init scene
-	scene = new THREE.Scene();
+// creat webGL renderer and set size to window, then hook up the renderer to the scene
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize( window.innerWidth, window.innerHeight );
+renderer.setClearColor( 0xffffff, .1 );
+document.body.appendChild( renderer.domElement );
 
-	// Init camera (PerspectiveCamera)
-	camera = new THREE.PerspectiveCamera(
-		75,
-		window.innerWidth / window.innerHeight,
-		0.1,
-		1000
-	);
+// when the page resizes, update the renderer and aspect ratio to reflect new size
+window.addEventListener( 'resize', function( )
+			 {
+			     var width = window.innerWidth;
+			     var height = window.innerHeight;
+			     renderer.setSize( width, height );
+			     camera.aspect = width / height;
+			     camera.updateProjectionMatrix( );
+			 } );
 
-	// Init renderer
-	renderer = new THREE.WebGLRenderer({ antialias: true });
+// create box geometry
+const geometry = new THREE.BoxGeometry();
+// create material for geometry, just green
+const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+// creates cube using geometry and material
+const cube = new THREE.Mesh( geometry, material );
+// add cube to scene
+scene.add( cube );
+// set camera position so it can see the cube
+camera.position.z = 5;
 
-	// Set size (whole window)
-	renderer.setSize(window.innerWidth, window.innerHeight);
+// animation function that runs every frame
+const animate = function () {
+  requestAnimationFrame( animate );
 
-	// Render to canvas element
-	document.body.appendChild(renderer.domElement);
+  cube.rotation.x += 0.01;
+  cube.rotation.y += 0.01;
 
-	// Init BoxGeometry object (rectangular cuboid)
-	const geometry = new THREE.BoxGeometry(3, 3, 3);
+  renderer.render( scene, camera );
+};
 
-	// Create material with color
-	const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-
-	// Add texture -
-	// const texture = new THREE.TextureLoader().load('textures/crate.gif');
-
-	// Create material with texture
-	// const material = new THREE.MeshBasicMaterial({ map: texture });
-
-	// Create mesh with geo and material
-	cube = new THREE.Mesh(geometry, material);
-	// Add to scene
-	scene.add(cube);
-
-	// Position camera
-	camera.position.z = 5;
-}
-
-// Draw the scene every time the screen is refreshed
-function animate() {
-	requestAnimationFrame(animate);
-
-	// Rotate cube (Change values to change speed)
-	cube.rotation.x += 0.01;
-	cube.rotation.y += 0.01;
-
-	renderer.render(scene, camera);
-}
-
-function onWindowResize() {
-	// Camera frustum aspect ratio
-	camera.aspect = window.innerWidth / window.innerHeight;
-	// After making changes to aspect
-	camera.updateProjectionMatrix();
-	// Reset size
-	renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-window.addEventListener('resize', onWindowResize, false);
-
-init();
+// run animate
 animate();
